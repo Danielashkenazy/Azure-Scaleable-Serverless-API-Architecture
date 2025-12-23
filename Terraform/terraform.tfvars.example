@@ -1,0 +1,6 @@
+# This is a template file. Copy this to terraform.tfvars and fill in your values.
+# DO NOT commit terraform.tfvars with real values!
+
+db_admin_username = "your_db_admin_username"
+db_admin_password = "your_secure_password"
+openweather_api_key = "your_openweather_api_key"

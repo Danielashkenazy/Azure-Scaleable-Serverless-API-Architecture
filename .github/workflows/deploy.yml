@@ -1,0 +1,63 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Terraform
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+    
+    - name: Terraform Init
+      run: terraform init
+    
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      continue-on-error: true
+    
+    - name: Terraform Validate
+      run: terraform validate
+    
+    - name: Terraform Plan
+      run: |
+        terraform plan \
+          -var="db_admin_username=${{ secrets.DB_ADMIN_USERNAME }}" \
+          -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}" \
+          -var="openweather_api_key=${{ secrets.OPENWEATHER_API_KEY }}" \
+          -out=tfplan
+    
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve tfplan
+    
+    - name: Upload Terraform State
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-state
+        path: ./Terraform/terraform.tfstate
+        retention-days: 30
