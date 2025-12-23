@@ -24,8 +24,9 @@ variable "function_storage_account_name" {
 }
 
 variable "api_url" {
-  description = "API base URL to inject into JavaScript"
+  description = "API base URL to inject into JavaScript (placeholder if not provided)"
   type        = string
+  default     = "https://placeholder.azurefd.net"
 }
 
 variable "app_source_path" {

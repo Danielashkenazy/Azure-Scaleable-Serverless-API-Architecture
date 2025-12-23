@@ -12,8 +12,8 @@ resource "azurerm_service_plan" "func_plan" {
   name                = var.service_plan_name
   location            = var.location
   resource_group_name = var.resource_group_name
-  os_type             = "Linux"  # Linux = cheaper than Windows
-  sku_name            = "Y1"     # Y1 = Consumption tier
+  os_type             = "Linux" # Linux = cheaper than Windows
+  sku_name            = "Y1"    # Y1 = Consumption tier
 
   tags = var.tags
 }
@@ -33,7 +33,7 @@ resource "azurerm_linux_function_app" "weather_api" {
   location                   = var.location
   storage_account_name       = var.storage_account_name
   storage_account_access_key = var.storage_account_access_key
-  
+
   #### Code Deployment ####
   # ZIP deployment: All Python code packaged into single file
   zip_deploy_file = var.function_package_path
@@ -41,17 +41,17 @@ resource "azurerm_linux_function_app" "weather_api" {
   #### Application Configuration ####
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
-    
+
     #### Database Connection ####
-    DB_HOST            = var.db_host
-    DB_USER            = var.db_user
-    DB_PASSWORD        = var.db_password
-    DB_NAME            = var.db_name
-    DB_PORT            = "5432"
-    
+    DB_HOST     = var.db_host
+    DB_USER     = var.db_user
+    DB_PASSWORD = var.db_password
+    DB_NAME     = var.db_name
+    DB_PORT     = "5432"
+
     #### External APIs ####
     OPENWEATHER_API_KEY = var.openweather_api_key
-    
+
     #### Application Insights Integration ####
     # Automatically tracks: requests, dependencies, exceptions, custom events
     APPLICATIONINSIGHTS_CONNECTION_STRING = var.app_insights_connection_string
@@ -79,7 +79,7 @@ resource "azurerm_linux_function_app" "weather_api" {
       action     = "Deny"
       ip_address = "0.0.0.0/0"
     }
-    
+
     #### SCM Access ####
     # Allow Kudu/deployment without main IP restrictions
     scm_use_main_ip_restriction = false

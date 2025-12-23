@@ -22,7 +22,7 @@ resource "azurerm_api_management" "apimm" {
   resource_group_name = var.resource_group_name
   publisher_name      = var.publisher_name
   publisher_email     = var.publisher_email
-  
+
   #### Consumption Tier ####
   # Serverless, pay-per-call model - massive cost savings!
   sku_name = var.sku_name
@@ -44,14 +44,14 @@ resource "azurerm_api_management_api" "weather_api" {
   revision            = "1"
   display_name        = "Weather API"
   protocols           = ["https"]
-  
+
   #### Path Configuration ####
   # Frontend: /weather/*
   # Backend: /api/*
   path        = "weather"
   service_url = "https://${var.function_app_hostname}/api"
 
-  subscription_required = false  # Public API, no subscription key needed
+  subscription_required = false # Public API, no subscription key needed
 }
 
 ######################################################################################
@@ -163,8 +163,8 @@ XML
 ######################################################################################
 
 resource "azurerm_monitor_diagnostic_setting" "apim_logs" {
-  name               = "apim-diagnostics"
-  target_resource_id = azurerm_api_management.apimm.id
+  name                       = "apim-diagnostics"
+  target_resource_id         = azurerm_api_management.apimm.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
   enabled_log {

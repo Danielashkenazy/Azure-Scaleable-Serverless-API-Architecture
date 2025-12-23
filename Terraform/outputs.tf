@@ -41,7 +41,7 @@ output "app_insights_name" {
 
 output "deployment_summary" {
   description = "Quick deployment summary"
-  value = <<-EOT
+  value       = <<-EOT
     ====================================
     Weather App Deployment Complete! 🎉
     ====================================
@@ -53,8 +53,8 @@ output "deployment_summary" {
     - Application Insights: weather-app-insights
     - Log Analytics: weather-logs
     
-    Resource Group: ${module.networking.resource_group_name}
-    Location: ${module.networking.resource_group_location}
+    Resource Group: ${azurerm_resource_group.rg.name}
+    Location: ${azurerm_resource_group.rg.location}
     
     Note: CDN may take 5-10 minutes to propagate globally.
   EOT

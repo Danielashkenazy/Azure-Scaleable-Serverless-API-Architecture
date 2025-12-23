@@ -13,21 +13,21 @@ resource "azurerm_postgresql_flexible_server" "db" {
   version                = var.postgres_version
   administrator_login    = var.admin_username
   administrator_password = var.admin_password
-  
+
   #### SKU Configuration ####
   # B_Standard_B1ms: 1 vCore, 2GB RAM, burstable - best cost/performance for low traffic
-  sku_name               = var.sku_name
-  storage_mb             = var.storage_mb
-  
+  sku_name   = var.sku_name
+  storage_mb = var.storage_mb
+
   #### Availability Configuration ####
   # Zone 1: Single zone deployment (multi-zone adds cost)
   # Auto-grow: Prevents storage full issues
-  zone                   = "1"
-  auto_grow_enabled      = true
-  
+  zone              = "1"
+  auto_grow_enabled = true
+
   #### Backup Configuration ####
   # 7 days: Minimum for production, balances cost vs recovery needs
-  backup_retention_days  = var.backup_retention_days
+  backup_retention_days = var.backup_retention_days
 
   tags = var.tags
 }

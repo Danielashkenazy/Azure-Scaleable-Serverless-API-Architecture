@@ -10,17 +10,17 @@
 ######################################################################################
 
 resource "azurerm_key_vault" "kv" {
-  name                        = var.key_vault_name
-  resource_group_name         = var.resource_group_name
-  location                    = var.location
-  tenant_id                   = var.tenant_id
-  sku_name                    = "standard"
-  
+  name                = var.key_vault_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tenant_id           = var.tenant_id
+  sku_name            = "standard"
+
   #### Purge Protection ####
   # Disabled for dev/test (allows immediate re-creation)
   # Production: MUST be enabled to prevent accidental deletion
-  purge_protection_enabled    = false
-  
+  purge_protection_enabled = false
+
   tags = var.tags
 }
 

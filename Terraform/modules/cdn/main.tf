@@ -64,11 +64,11 @@ resource "azurerm_cdn_frontdoor_origin_group" "static_group" {
 ######################################################################################
 
 resource "azurerm_cdn_frontdoor_origin" "static_origin" {
-  name                          = "static-origin"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.static_group.id
-  enabled                       = true
+  name                           = "static-origin"
+  cdn_frontdoor_origin_group_id  = azurerm_cdn_frontdoor_origin_group.static_group.id
+  enabled                        = true
   certificate_name_check_enabled = true
-  
+
   #### Origin Configuration ####
   # Remove https:// and trailing / from storage endpoint
   host_name = replace(
@@ -115,11 +115,11 @@ resource "azurerm_cdn_frontdoor_origin_group" "apim_group" {
 ######################################################################################
 
 resource "azurerm_cdn_frontdoor_origin" "apim_origin" {
-  name                          = "apim-origin"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.apim_group.id
-  enabled                       = true
+  name                           = "apim-origin"
+  cdn_frontdoor_origin_group_id  = azurerm_cdn_frontdoor_origin_group.apim_group.id
+  enabled                        = true
   certificate_name_check_enabled = true
-  
+
   host_name          = replace(var.apim_gateway_url, "https://", "")
   origin_host_header = replace(var.apim_gateway_url, "https://", "")
 
@@ -141,9 +141,9 @@ resource "azurerm_cdn_frontdoor_route" "api_route" {
 
   #### Route Matching ####
   # Matches: /weather, /weather/anything
-  patterns_to_match     = ["/weather", "/weather/*"]
-  supported_protocols   = ["Http", "Https"]
-  forwarding_protocol   = "HttpsOnly"  # Force HTTPS
+  patterns_to_match      = ["/weather", "/weather/*"]
+  supported_protocols    = ["Http", "Https"]
+  forwarding_protocol    = "HttpsOnly" # Force HTTPS
   link_to_default_domain = true
   enabled                = true
 }
@@ -162,12 +162,12 @@ resource "azurerm_cdn_frontdoor_route" "static_route" {
 
   #### Catch-All Pattern ####
   # Matches everything not matched by API route
-  patterns_to_match     = ["/", "/*"]
-  supported_protocols   = ["Http", "Https"]
-  forwarding_protocol   = "HttpsOnly"
+  patterns_to_match      = ["/", "/*"]
+  supported_protocols    = ["Http", "Https"]
+  forwarding_protocol    = "HttpsOnly"
   link_to_default_domain = true
   enabled                = true
-  
+
   #### Dependency ####
   # Ensures API route is created first
   depends_on = [

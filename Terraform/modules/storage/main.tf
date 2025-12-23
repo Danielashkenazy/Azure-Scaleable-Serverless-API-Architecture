@@ -10,7 +10,7 @@ resource "azurerm_storage_account" "static" {
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = "Standard"
-  account_replication_type = "LRS"  # Locally redundant - sufficient for static content
+  account_replication_type = "LRS" # Locally redundant - sufficient for static content
 
   #### Static Website Feature ####
   # Automatically serves index.html and handles 404 errors
@@ -57,7 +57,7 @@ resource "azurerm_storage_blob" "script" {
     "___API_URL___",
     var.api_url
   )
-  
+
   content_type = "application/javascript"
 }
 

@@ -77,16 +77,16 @@ module "monitoring" {
 module "database" {
   source = "./modules/database"
 
-  resource_group_name    = azurerm_resource_group.rg.name
-  location               = azurerm_resource_group.rg.location
-  server_name            = "weather-postgres-${random_integer.suffix.result}"
-  database_name          = "weatherdb"
-  admin_username         = var.db_admin_username
-  admin_password         = var.db_admin_password
-  sku_name               = "B_Standard_B1ms"
-  storage_mb             = 32768
-  postgres_version       = "15"
-  backup_retention_days  = 7
+  resource_group_name   = azurerm_resource_group.rg.name
+  location              = azurerm_resource_group.rg.location
+  server_name           = "weather-postgres-${random_integer.suffix.result}"
+  database_name         = "weatherdb"
+  admin_username        = var.db_admin_username
+  admin_password        = var.db_admin_password
+  sku_name              = "B_Standard_B1ms"
+  storage_mb            = 32768
+  postgres_version      = "15"
+  backup_retention_days = 7
 
   tags = var.tags
 
@@ -100,15 +100,15 @@ module "database" {
 module "security" {
   source = "./modules/security"
 
-  resource_group_name    = azurerm_resource_group.rg.name
-  location               = azurerm_resource_group.rg.location
-  key_vault_name         = "weather-kv-${random_integer.suffix.result}"
-  tenant_id              = data.azurerm_client_config.current.tenant_id
-  deployer_object_id     = data.azurerm_client_config.current.object_id
-  db_host                = module.database.server_fqdn
-  db_username            = var.db_admin_username
-  db_password            = var.db_admin_password
-  openweather_api_key    = var.openweather_api_key
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  key_vault_name      = "weather-kv-${random_integer.suffix.result}"
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  deployer_object_id  = data.azurerm_client_config.current.object_id
+  db_host             = module.database.server_fqdn
+  db_username         = var.db_admin_username
+  db_password         = var.db_admin_password
+  openweather_api_key = var.openweather_api_key
 
   tags = var.tags
 
@@ -122,13 +122,12 @@ module "security" {
 module "storage" {
   source = "./modules/storage"
 
-  resource_group_name             = azurerm_resource_group.rg.name
-  location                        = azurerm_resource_group.rg.location
-  static_storage_account_name     = "weatherstatic${random_integer.suffix.result}"
-  function_storage_account_name   = "weatherfunc${random_integer.suffix.result}"
-  # API URL will be set after CDN is created - circular dependency handled below
-  api_url                         = "https://${module.cdn.front_door_endpoint_hostname}"
-  app_source_path                 = "${path.module}/../weather-app/static"
+  resource_group_name           = azurerm_resource_group.rg.name
+  location                      = azurerm_resource_group.rg.location
+  static_storage_account_name   = "weatherstatic${random_integer.suffix.result}"
+  function_storage_account_name = "weatherfunc${random_integer.suffix.result}"
+
+  app_source_path = "${path.module}/../weather-app/static"
 
   tags = var.tags
 
@@ -142,11 +141,11 @@ module "storage" {
 module "cdn" {
   source = "./modules/cdn"
 
-  resource_group_name       = azurerm_resource_group.rg.name
-  profile_name              = "weather-frontdoor-profile"
-  endpoint_name             = "weather-fd-endpoint"
-  static_storage_endpoint   = module.storage.static_website_endpoint
-  apim_gateway_url          = module.api_gateway.apim_gateway_url
+  resource_group_name     = azurerm_resource_group.rg.name
+  profile_name            = "weather-frontdoor-profile"
+  endpoint_name           = "weather-fd-endpoint"
+  static_storage_endpoint = module.storage.static_website_endpoint
+  apim_gateway_url        = module.api_gateway.apim_gateway_url
 
   tags = var.tags
 
@@ -180,7 +179,6 @@ module "compute" {
   db_name                        = module.database.database_name
   openweather_api_key            = module.security.openweather_api_key_secret_value
   app_insights_connection_string = module.monitoring.app_insights_connection_string
-  api_management_ips             = module.api_gateway.apim_public_ip_addresses
 
   tags = var.tags
 
@@ -201,14 +199,14 @@ module "compute" {
 module "api_gateway" {
   source = "./modules/api-gateway"
 
-  resource_group_name           = azurerm_resource_group.rg.name
-  location                      = azurerm_resource_group.rg.location
-  apim_name                     = "weather-apimm-${random_integer.suffix.result}"
-  publisher_name                = "WeatherCorp"
-  publisher_email               = "admin@weathercorp.com"
-  sku_name                      = "Consumption_0"  # Changed from Standard to Consumption!
-  function_app_hostname         = module.compute.function_app_default_hostname
-  log_analytics_workspace_id    = module.monitoring.log_analytics_workspace_id
+  resource_group_name        = azurerm_resource_group.rg.name
+  location                   = azurerm_resource_group.rg.location
+  apim_name                  = "weather-apimm-${random_integer.suffix.result}"
+  publisher_name             = "WeatherCorp"
+  publisher_email            = "admin@weathercorp.com"
+  sku_name                   = "Consumption_0" # Changed from Standard to Consumption!
+  function_app_hostname      = module.compute.function_app_default_hostname
+  log_analytics_workspace_id = module.monitoring.log_analytics_workspace_id
 
   tags = var.tags
 

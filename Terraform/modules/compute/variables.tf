@@ -75,8 +75,9 @@ variable "app_insights_connection_string" {
 }
 
 variable "api_management_ips" {
-  description = "List of API Management public IPs for access restriction"
+  description = "List of API Management public IPs for access restriction (optional)"
   type        = list(string)
+  default     = []
 }
 
 variable "tags" {
