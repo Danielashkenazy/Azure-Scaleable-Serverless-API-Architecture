@@ -10,18 +10,13 @@ on:
   workflow_dispatch:
 
 env:
-  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  TF_VERSION: '1.6.0'
+  WORKING_DIR: './Terraform'
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: 'Terraform Deploy'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./Terraform
     
     steps:
     - name: Checkout
@@ -30,34 +25,70 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.6.0
+        terraform_version: ${{ env.TF_VERSION }}
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: Terraform Init
+      working-directory: ${{ env.WORKING_DIR }}
       run: terraform init
     
     - name: Terraform Format Check
-      run: terraform fmt -check
+      working-directory: ${{ env.WORKING_DIR }}
+      run: terraform fmt -check -recursive
       continue-on-error: true
     
     - name: Terraform Validate
+      working-directory: ${{ env.WORKING_DIR }}
       run: terraform validate
     
     - name: Terraform Plan
+      working-directory: ${{ env.WORKING_DIR }}
       run: |
         terraform plan \
           -var="db_admin_username=${{ secrets.DB_ADMIN_USERNAME }}" \
           -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}" \
           -var="openweather_api_key=${{ secrets.OPENWEATHER_API_KEY }}" \
           -out=tfplan
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan
+        path: ${{ env.WORKING_DIR }}/tfplan
+        retention-days: 7
     
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      working-directory: ${{ env.WORKING_DIR }}
       run: terraform apply -auto-approve tfplan
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    
+    - name: Get Terraform Outputs
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        echo "### Deployment Outputs" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        terraform output >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
     
     - name: Upload Terraform State
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: terraform-state
-        path: ./Terraform/terraform.tfstate
+        path: ${{ env.WORKING_DIR }}/terraform.tfstate*
         retention-days: 30

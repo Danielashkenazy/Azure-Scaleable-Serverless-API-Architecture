@@ -5,13 +5,14 @@
       "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
+      "name": "req",
       "methods": [ "get" ],
       "route": "weather"
     },
     {
       "type": "http",
       "direction": "out",
-      "name": "$return"
+      "name": "res"
     }
   ]
 }

@@ -111,7 +111,7 @@ saveBtn.addEventListener("click", async () => {
   saveBtn.disabled = true;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/weather/save`, {
+    const res = await fetch(`${API_BASE_URL}/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
