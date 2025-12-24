@@ -77,11 +77,7 @@ resource "azurerm_cdn_frontdoor_origin" "static_origin" {
     ""
   )
 
-  origin_host_header = replace(
-    replace(var.static_storage_endpoint, "https://", ""),
-    "/",
-    ""
-  )
+  origin_host_header = ""
 
   http_port  = 80
   https_port = 443
