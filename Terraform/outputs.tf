@@ -31,7 +31,7 @@ output "function_app_name" {
 
 output "resource_group_name" {
   description = "Name of the resource group containing all resources"
-  value       = azurerm_resource_group.rg.name
+  value       = data.azurerm_resource_group.rg.name
 }
 
 output "app_insights_name" {
@@ -53,8 +53,8 @@ output "deployment_summary" {
     - Application Insights: weather-app-insights
     - Log Analytics: weather-logs
     
-    Resource Group: ${azurerm_resource_group.rg.name}
-    Location: ${azurerm_resource_group.rg.location}
+    Resource Group: ${data.azurerm_resource_group.rg.name}
+    Location: ${data.azurerm_resource_group.rg.location}
     
     Note: CDN may take 5-10 minutes to propagate globally.
   EOT

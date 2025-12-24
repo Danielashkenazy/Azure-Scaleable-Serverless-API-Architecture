@@ -75,15 +75,15 @@ data "azurerm_resource_group" "rg" {
 module "monitoring" {
   source = "./modules/monitoring"
 
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
   log_analytics_name  = "weather-logs"
   app_insights_name   = "weather-app-insights"
   retention_days      = 30
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg]
+  depends_on = [data.azurerm_resource_group.rg]
 }
 
 ######################################################################################
@@ -93,8 +93,8 @@ module "monitoring" {
 module "database" {
   source = "./modules/database"
 
-  resource_group_name   = azurerm_resource_group.rg.name
-  location              = azurerm_resource_group.rg.location
+  resource_group_name   = data.azurerm_resource_group.rg.name
+  location              = data.azurerm_resource_group.rg.location
   server_name           = "weather-postgres-${random_integer.suffix.result}"
   database_name         = "weatherdb"
   admin_username        = var.db_admin_username
@@ -106,7 +106,7 @@ module "database" {
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg]
+  depends_on = [data.azurerm_resource_group.rg]
 }
 
 ######################################################################################
@@ -116,8 +116,8 @@ module "database" {
 module "security" {
   source = "./modules/security"
 
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
   key_vault_name      = "weather-kv-${random_integer.suffix.result}"
   tenant_id           = data.azurerm_client_config.current.tenant_id
   deployer_object_id  = data.azurerm_client_config.current.object_id
@@ -128,7 +128,7 @@ module "security" {
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg, module.database]
+  depends_on = [data.azurerm_resource_group.rg, module.database]
 }
 
 ######################################################################################
@@ -138,8 +138,8 @@ module "security" {
 module "storage" {
   source = "./modules/storage"
 
-  resource_group_name           = azurerm_resource_group.rg.name
-  location                      = azurerm_resource_group.rg.location
+  resource_group_name           = data.azurerm_resource_group.rg.name
+  location                      = data.azurerm_resource_group.rg.location
   static_storage_account_name   = "weatherstatic${random_integer.suffix.result}"
   function_storage_account_name = "weatherfunc${random_integer.suffix.result}"
 
@@ -147,7 +147,7 @@ module "storage" {
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg]
+  depends_on = [data.azurerm_resource_group.rg]
 }
 
 ######################################################################################
@@ -157,7 +157,7 @@ module "storage" {
 module "cdn" {
   source = "./modules/cdn"
 
-  resource_group_name     = azurerm_resource_group.rg.name
+  resource_group_name     = data.azurerm_resource_group.rg.name
   profile_name            = "weather-frontdoor-profile"
   endpoint_name           = "weather-fd-endpoint"
   static_storage_endpoint = module.storage.static_website_endpoint
@@ -165,7 +165,7 @@ module "cdn" {
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg, module.storage, module.api_gateway]
+  depends_on = [data.azurerm_resource_group.rg, module.storage, module.api_gateway]
 }
 
 ######################################################################################
@@ -182,8 +182,8 @@ data "archive_file" "function_zip" {
 module "compute" {
   source = "./modules/compute"
 
-  resource_group_name            = azurerm_resource_group.rg.name
-  location                       = azurerm_resource_group.rg.location
+  resource_group_name            = data.azurerm_resource_group.rg.name
+  location                       = data.azurerm_resource_group.rg.location
   function_app_name              = "weather-api-func-${random_integer.suffix.result}"
   service_plan_name              = "weather-func-plan"
   storage_account_name           = module.storage.function_storage_account_name
@@ -199,7 +199,7 @@ module "compute" {
   tags = var.tags
 
   depends_on = [
-    azurerm_resource_group.rg,
+    data.azurerm_resource_group.rg,
     module.storage,
     module.security,
     module.database,
@@ -215,8 +215,8 @@ module "compute" {
 module "api_gateway" {
   source = "./modules/api-gateway"
 
-  resource_group_name        = azurerm_resource_group.rg.name
-  location                   = azurerm_resource_group.rg.location
+  resource_group_name        = data.azurerm_resource_group.rg.name
+  location                   = data.azurerm_resource_group.rg.location
   apim_name                  = "weather-apimm-${random_integer.suffix.result}"
   publisher_name             = "WeatherCorp"
   publisher_email            = "admin@weathercorp.com"
@@ -226,5 +226,5 @@ module "api_gateway" {
 
   tags = var.tags
 
-  depends_on = [azurerm_resource_group.rg, module.compute, module.monitoring]
+  depends_on = [data.azurerm_resource_group.rg, module.compute, module.monitoring]
 }
