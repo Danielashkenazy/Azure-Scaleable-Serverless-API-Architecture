@@ -27,11 +27,6 @@ jobs:
       with:
         terraform_version: ${{ env.TF_VERSION }}
     
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
     - name: Terraform Init
       working-directory: ${{ env.WORKING_DIR }}
       run: |
@@ -40,6 +35,11 @@ jobs:
           -backend-config="storage_account_name=tfstateweather1224" \
           -backend-config="container_name=tfstate" \
           -backend-config="key=weather-app.terraform.tfstate"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
     - name: Terraform Format Check
       working-directory: ${{ env.WORKING_DIR }}
@@ -49,6 +49,11 @@ jobs:
     - name: Terraform Validate
       working-directory: ${{ env.WORKING_DIR }}
       run: terraform validate
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
     - name: Terraform Plan
       working-directory: ${{ env.WORKING_DIR }}
@@ -89,4 +94,9 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
         terraform output >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-    
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
