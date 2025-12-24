@@ -21,6 +21,23 @@ terraform {
       version = "~> 3.6.0"
     }
   }
+
+  ######################################################################################
+  # Remote Backend Configuration
+  # Purpose: Store Terraform state in Azure Storage Account
+  # Benefits: 
+  #   - State locking prevents concurrent modifications
+  #   - Centralized state for team collaboration
+  #   - State versioning and backup
+  # Note: Configure backend.tfvars with your storage account details
+  ######################################################################################
+  backend "azurerm" {
+    # These values should be provided via backend.tfvars or environment variables
+    # resource_group_name  = "terraform-state-rg"
+    # storage_account_name = "tfstateXXXXX"
+    # container_name       = "tfstate"
+    # key                  = "weather-app.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -44,12 +61,11 @@ resource "random_integer" "suffix" {
 # Resource Group
 # Purpose: Central container for all weather application resources
 # Best Practice: Single RG per application for easier management and RBAC
+# Note: Using existing RG created via CLI to avoid recreation
 ######################################################################################
 
-resource "azurerm_resource_group" "rg" {
-  name     = "weather-app-rg"
-  location = var.location
-  tags     = var.tags
+data "azurerm_resource_group" "rg" {
+  name = "weather-app-main-rg"
 }
 
 ######################################################################################

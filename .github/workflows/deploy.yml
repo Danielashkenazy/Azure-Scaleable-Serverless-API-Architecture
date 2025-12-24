@@ -34,7 +34,12 @@ jobs:
     
     - name: Terraform Init
       working-directory: ${{ env.WORKING_DIR }}
-      run: terraform init
+      run: |
+        terraform init \
+          -backend-config="resource_group_name=weather-app-main-rg" \
+          -backend-config="storage_account_name=tfstateweather1224" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="key=weather-app.terraform.tfstate"
     
     - name: Terraform Format Check
       working-directory: ${{ env.WORKING_DIR }}
@@ -85,10 +90,3 @@ jobs:
         terraform output >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
     
-    - name: Upload Terraform State
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-state
-        path: ${{ env.WORKING_DIR }}/terraform.tfstate*
-        retention-days: 30

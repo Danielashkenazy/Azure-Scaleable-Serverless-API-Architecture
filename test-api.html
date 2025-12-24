@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; font-size: 16px; }
+        .output { background: #252526; border: 1px solid #3e3e42; padding: 15px; margin-top: 20px; white-space: pre-wrap; max-height: 600px; overflow-y: auto; }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #569cd6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 API Debug Test Page</h1>
+    <p>Test the Weather API endpoints directly</p>
+    
+    <div>
+        <input type="text" id="cityInput" placeholder="Enter city name" value="London" style="padding: 10px; font-size: 16px; width: 300px;">
+    </div>
+    
+    <div>
+        <button onclick="testWeatherAPI()">Test /weather Endpoint</button>
+        <button onclick="testSaveAPI()">Test /save Endpoint</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+    
+    <div id="output" class="output">
+        <span class="info">Ready. Click buttons to test API endpoints.</span>
+    </div>
+
+    <script>
+        const API_BASE = "https://weather-apimm-6050.azure-api.net";
+        const outputDiv = document.getElementById('output');
+        const cityInput = document.getElementById('cityInput');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const line = `[${timestamp}] ${message}\n`;
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = line;
+            outputDiv.appendChild(span);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function clearOutput() {
+            outputDiv.innerHTML = '<span class="info">Output cleared.</span>';
+        }
+
+        async function testWeatherAPI() {
+            const city = cityInput.value.trim() || 'London';
+            log('='.repeat(60), 'info');
+            log(`Testing GET /weather?city=${city}`, 'info');
+            log(`URL: ${API_BASE}/weather?city=${city}`, 'info');
+            log(`Origin: ${window.location.origin}`, 'info');
+            
+            try {
+                const url = `${API_BASE}/weather?city=${encodeURIComponent(city)}`;
+                log(`\nFetching...`, 'info');
+                
+                const response = await fetch(url);
+                
+                log(`\nResponse Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log(`Response OK: ${response.ok}`, response.ok ? 'success' : 'error');
+                log(`Response Type: ${response.type}`, 'info');
+                log(`Response URL: ${response.url}`, 'info');
+                
+                log(`\nResponse Headers:`, 'info');
+                for (const [key, value] of response.headers.entries()) {
+                    log(`  ${key}: ${value}`, 'info');
+                }
+                
+                const text = await response.text();
+                log(`\nResponse Body (raw):`, 'info');
+                log(text, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(text);
+                        log(`\nParsed JSON:`, 'success');
+                        log(JSON.stringify(data, null, 2), 'success');
+                    } catch (e) {
+                        log(`Failed to parse as JSON: ${e.message}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log(`\n❌ FETCH ERROR:`, 'error');
+                log(`Message: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+            
+            log('='.repeat(60) + '\n', 'info');
+        }
+
+        async function testSaveAPI() {
+            const city = cityInput.value.trim() || 'London';
+            const name = 'Test User';
+            
+            log('='.repeat(60), 'info');
+            log(`Testing POST /save`, 'info');
+            log(`URL: ${API_BASE}/save`, 'info');
+            log(`Payload: { name: "${name}", city: "${city}" }`, 'info');
+            
+            try {
+                const url = `${API_BASE}/save`;
+                const payload = { name, city };
+                
+                log(`\nFetching...`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`\nResponse Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log(`Response OK: ${response.ok}`, response.ok ? 'success' : 'error');
+                
+                log(`\nResponse Headers:`, 'info');
+                for (const [key, value] of response.headers.entries()) {
+                    log(`  ${key}: ${value}`, 'info');
+                }
+                
+                const text = await response.text();
+                log(`\nResponse Body (raw):`, 'info');
+                log(text, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(text);
+                        log(`\nParsed JSON:`, 'success');
+                        log(JSON.stringify(data, null, 2), 'success');
+                    } catch (e) {
+                        log(`Failed to parse as JSON: ${e.message}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log(`\n❌ FETCH ERROR:`, 'error');
+                log(`Message: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+            
+            log('='.repeat(60) + '\n', 'info');
+        }
+
+        // Log initial info
+        log(`API Base URL: ${API_BASE}`, 'success');
+        log(`Current Origin: ${window.location.origin}`, 'info');
+        log(`\nReady to test!`, 'success');
+    </script>
+</body>
+</html>
