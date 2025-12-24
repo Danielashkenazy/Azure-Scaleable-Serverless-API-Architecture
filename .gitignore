@@ -12,6 +12,8 @@ override.tf.json
 .terraformrc
 terraform.rc
 function-package.zip
+*.backup
+terraform.exe
 
 # Azure
 .azure/
@@ -44,3 +46,6 @@ secrets.txt
 credentials.json
 *.pem
 *.key
+
+# Test files
+test-api.html
